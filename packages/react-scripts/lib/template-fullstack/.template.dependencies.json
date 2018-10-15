@@ -1,0 +1,8 @@
+{
+    "dependencies": {
+        "redux": "^4.0.1",
+        "react-redux": "^5.0.7",
+        "eslint-config-react-app": "^3.0.4",
+        "eslint-config-react": "^1.1.7"
+    }
+}

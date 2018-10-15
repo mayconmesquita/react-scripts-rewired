@@ -122,10 +122,31 @@ module.exports = function(
     );
   }
 
+  // try to get a local named template
+  const getTemplatePath = (template) => {
+    if (!template) return null
+
+    const customTemplatePath = path.resolve(originalDirectory, template);
+    // console.log('custom template', customTemplatePath)
+    if (fs.existsSync(customTemplatePath)) return customTemplatePath;
+
+    const knownTemplatePath = path.join(ownPath, `lib/template-${template}`);
+    // console.log('known template', knownTemplatePath)
+    if (fs.existsSync(knownTemplatePath)) return knownTemplatePath;
+  };
+
   // Copy the files for the user
   const templatePath = template
-    ? path.resolve(originalDirectory, template)
+    ? getTemplatePath(template)
     : path.join(ownPath, useTypeScript ? 'template-typescript' : 'template');
+// <<<<<<< HEAD
+//     ? path.resolve(originalDirectory, template)
+//     : path.join(ownPath, useTypeScript ? 'template-typescript' : 'template');
+// =======
+//     // ? path.resolve(originalDirectory, template)
+//     ? getTemplatePath(template)
+//     : path.join(ownPath, 'template');
+// >>>>>>> templates
   if (fs.existsSync(templatePath)) {
     fs.copySync(templatePath, appPath);
   } else {
@@ -167,6 +188,7 @@ module.exports = function(
   args.push('react', 'react-dom');
 
   // Install additional template dependencies, if present
+  let hasTemplateDependencies = false;
   const templateDependenciesPath = path.join(
     appPath,
     '.template.dependencies.json'
@@ -179,12 +201,13 @@ module.exports = function(
       })
     );
     fs.unlinkSync(templateDependenciesPath);
+    hasTemplateDependencies = true;
   }
 
   // Install react and react-dom for backward compatibility with old CRA cli
   // which doesn't install react and react-dom along with react-scripts
   // or template is presetend (via --internal-testing-template)
-  if (!isReactInstalled(appPackage) || template) {
+  if (!isReactInstalled(appPackage) || template || hasTemplateDependencies) {
     console.log(`Installing react and react-dom using ${command}...`);
     console.log();
 
